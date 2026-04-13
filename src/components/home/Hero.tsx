@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 const marqueeItems = [
   "Same direction rides",
   "Real-time matching",
@@ -29,7 +31,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.8, ease: smoothEase },
   },
 };
 
@@ -38,7 +40,7 @@ const letterVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: smoothEase },
   },
 };
 
@@ -137,14 +139,14 @@ export default function Hero() {
               opacity: 1,
               scale: 1,
               filter: "blur(0px)",
-              transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
+              transition: { duration: 1.2, ease: smoothEase, delay: 0.2 },
             },
           }}
           className="relative w-full h-[50vh] md:h-[55vh] lg:h-full min-h-[320px] rounded-[4px] overflow-hidden order-1 lg:order-2"
         >
           <motion.div
             whileHover={{ scale: 1.03 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: smoothEase }}
             className="relative w-full h-full"
           >
             <Image

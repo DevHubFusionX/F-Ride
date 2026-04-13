@@ -93,7 +93,6 @@ export default function TripCheckoutModal({ isOpen, onClose, onComplete, role, p
                         >
                           <Star 
                             size={28} 
-                            weight="fill"
                             className={`transition-colors ${
                                (hoveredStar || rating) >= star 
                                ? "fill-amber-400 text-amber-400" 

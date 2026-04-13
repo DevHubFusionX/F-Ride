@@ -18,6 +18,7 @@ interface RiderActiveTripHUDProps {
   };
   variant?: "floating" | "inline";
   className?: string;
+  status?: string;
   onCancel: () => void;
   onRequestStop: () => void;
   onShowPIN?: () => void;

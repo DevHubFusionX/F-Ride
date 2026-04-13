@@ -20,6 +20,8 @@ interface CourierActiveTripHUDProps {
   status?: string;
   variant?: "floating" | "inline";
   className?: string;
+  onAbort?: () => void;
+  onComplete?: () => void;
 }
 
 export default function CourierActiveTripHUD({ 

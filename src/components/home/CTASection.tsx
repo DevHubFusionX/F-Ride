@@ -47,7 +47,7 @@ export default function CTASection() {
               visible: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }
               }
             }}
             className="text-[clamp(2.4rem,5.5vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white mb-8"
@@ -74,7 +74,7 @@ export default function CTASection() {
               visible: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
               }
             }}
             className="flex flex-wrap items-center gap-5"

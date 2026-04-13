@@ -212,7 +212,7 @@ export default function RiderDashboard() {
           <AnimatePresence>
             {showDrivers && dashboardState === "searching" && (
               <div className="absolute top-12 left-12 z-20 flex flex-col gap-4 pointer-events-none">
-                {MOCK_DRIVERS.map((driver, idx) => (
+                {MOCK_DRIVERS.map((driver) => (
                   <RiderMatchCard 
                     key={driver.name}
                     rider={driver}
@@ -220,6 +220,7 @@ export default function RiderDashboard() {
                       setSelectedDriver(driver);
                       setDashboardState("booked");
                     }}
+                    onReject={() => console.log("Rejected")}
                     onViewMore={() => {
                        setSelectedDriver(driver);
                        setIsModalOpen(true);

@@ -24,7 +24,7 @@ export default function LegalLayout({ children, title, lastUpdated }: LegalLayou
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
             >
               <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary/30 block mb-4">
                 Policy & Standards
@@ -43,7 +43,7 @@ export default function LegalLayout({ children, title, lastUpdated }: LegalLayou
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const }}
             className="prose prose-slate prose-invert max-w-none"
           >
             <div className="legal-content space-y-12 md:space-y-16">

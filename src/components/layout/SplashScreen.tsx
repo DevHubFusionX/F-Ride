@@ -24,7 +24,7 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ 
             opacity: 0, 
-            transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } 
+            transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } 
           }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-deep-blue overflow-hidden"
         >
@@ -54,7 +54,7 @@ export default function SplashScreen() {
               className="h-full bg-brand-blue"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ delay: 2, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 2, duration: 1.5, ease: [0.22, 1, 0.36, 1] as const }}
             />
           </motion.div>
         </motion.div>

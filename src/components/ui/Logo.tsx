@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 interface LogoProps {
   className?: string;
   isAnimated?: boolean;
@@ -13,7 +15,7 @@ export default function Logo({ className = "", isAnimated = false }: LogoProps) 
       pathLength: 1,
       opacity: 1,
       transition: {
-        pathLength: { delay: custom * 0.1, duration: 1.5, ease: [0.22, 1, 0.36, 1] },
+        pathLength: { delay: custom * 0.1, duration: 1.5, ease: smoothEase },
         opacity: { delay: custom * 0.1, duration: 0.01 }
       }
     })

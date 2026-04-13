@@ -69,7 +69,7 @@ function DropdownPanel({ item, onClose }: { item: NavItem; onClose: () => void }
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] as const }}
       className="absolute top-full left-0 right-0 z-40"
     >
       {/* Hairline separator */}
@@ -229,7 +229,7 @@ export default function Navbar() {
             <div className="flex flex-col items-end gap-[5px]">
               <motion.span
                 animate={mobileOpen ? { rotate: 45, y: 7, width: 22 } : { rotate: 0, y: 0, width: 22 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] as const }}
                 className="block h-[1.5px] bg-primary origin-center rounded-full"
               />
               <motion.span
@@ -239,7 +239,7 @@ export default function Navbar() {
               />
               <motion.span
                 animate={mobileOpen ? { rotate: -45, y: -7, width: 22 } : { rotate: 0, y: 0, width: 22 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] as const }}
                 className="block h-[1.5px] bg-primary origin-center rounded-full"
               />
             </div>
@@ -277,7 +277,7 @@ export default function Navbar() {
                     key={item.label}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: idx * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.4, delay: idx * 0.07, ease: [0.22, 1, 0.36, 1] as const }}
                     className="border-b border-light-gray/40"
                   >
                     <Link

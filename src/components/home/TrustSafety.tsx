@@ -66,7 +66,7 @@ export default function TrustSafety() {
                   opacity: 1,
                   scale: 1,
                   y: 0,
-                  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }
                 }
               }}
               className="flex items-baseline gap-3"
@@ -95,7 +95,7 @@ export default function TrustSafety() {
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] } }
+              visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] as const } }
             }}
             className="flex flex-col justify-end lg:pt-16"
           >
@@ -134,7 +134,7 @@ export default function TrustSafety() {
                 visible: {
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] }
+                  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }
                 }
               }}
               className={`border-t border-primary/8 py-8 md:py-10 ${

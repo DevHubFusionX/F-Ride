@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 interface EarlyAccessModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -60,7 +62,7 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
     initial: { opacity: 0, x: 40 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -40 },
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.4, ease: smoothEase },
   };
 
   return (
@@ -82,7 +84,7 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, ease: smoothEase }}
             className="fixed right-0 top-0 bottom-0 z-[61] w-full md:w-[560px] lg:w-[640px] bg-white flex flex-col"
           >
             {/* ── Header ── */}
@@ -111,7 +113,7 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
                 className="h-full bg-[#E76F32]"
                 initial={{ width: "0%" }}
                 animate={{ width: step === 0 ? "33%" : step === 1 ? "66%" : "100%" }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, ease: smoothEase }}
               />
             </div>
 
@@ -247,7 +249,7 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
                     <motion.div
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.5, delay: 0.1, ease: smoothEase }}
                       className="w-16 h-16 rounded-full bg-[#E76F32]/10 flex items-center justify-center mb-8"
                     >
                       <motion.svg

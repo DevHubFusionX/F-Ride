@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 const liveRides = [
   {
     initials: "AK",
@@ -91,7 +93,6 @@ export default function LiveMap() {
       pitch: 0,
       bearing: 0,
       interactive: true, 
-      antialias: true,
       cooperativeGestures: true // Allow two-finger pan on mobile
     });
 
@@ -224,7 +225,7 @@ export default function LiveMap() {
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+          transition={{ duration: 1, ease: smoothEase, delay: 0.2 }}
           className="relative"
         >
           {/* Glass card wrapper */}

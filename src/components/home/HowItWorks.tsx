@@ -50,7 +50,7 @@ export default function HowItWorks() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
               className="text-[clamp(2rem,4.5vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.03em] text-primary max-w-[550px]"
             >
               Three steps to a
@@ -95,7 +95,7 @@ export default function HowItWorks() {
                 visible: {
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }
                 }
               }}
               className="group border-t border-primary/8 last:border-b"

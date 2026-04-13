@@ -87,7 +87,7 @@ export default function DashboardTopBar() {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] as const }}
                 className="absolute right-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-sm p-2 z-[70] origin-top-right"
               >
                 <div className="px-4 py-3 border-b border-primary/5 mb-2">
