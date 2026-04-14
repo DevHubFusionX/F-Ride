@@ -46,6 +46,7 @@ const letterVariants = {
 
 export default function Hero() {
   const headline = "Going your way?";
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
   return (
     <section className="relative w-full min-h-[100svh] flex flex-col bg-[#F5F0EB] overflow-hidden">
@@ -150,7 +151,7 @@ export default function Hero() {
             className="relative w-full h-full"
           >
             <Image
-              src="/hero-bg.png"
+              src={`${basePath}/hero-bg.png`}
               alt="City commuters at golden hour"
               fill
               className="object-cover object-center"
