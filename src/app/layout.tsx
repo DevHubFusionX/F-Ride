@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 
 import QueryProvider from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import KeepAlive from "@/components/providers/KeepAlive";
 
 export default function RootLayout({
   children,
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-deep-blue font-sans">
         <QueryProvider>
           <AuthProvider>
+            <KeepAlive />
             <SplashScreen />
             <Navbar />
             {children}
