@@ -15,7 +15,7 @@ import {
   Lock,
   Timer,
 } from "lucide-react";
-import api from "@/lib/api/axios-client";
+import api, { wakeServer } from "@/lib/api/axios-client";
 import { useAuth, type AuthUser, type UserRole } from "@/contexts/AuthContext";
 
 /* ────────────────────────────────────────────────────────────── */
@@ -67,6 +67,9 @@ export default function RegisterForm() {
 
   const isEmail = identifier.includes("@");
   const contactField = isEmail ? "email" : "phone";
+
+  /* ── Wake server on mount ── */
+  useEffect(() => { wakeServer(); }, []);
 
   /* ── Timer Effect ── */
   useEffect(() => {

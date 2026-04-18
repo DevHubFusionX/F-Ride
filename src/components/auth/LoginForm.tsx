@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Smartphone, ShieldCheck, Mail, Loader2, Lock, Shield, Timer, Check } from "lucide-react";
-import api from "@/lib/api/axios-client";
+import api, { wakeServer } from "@/lib/api/axios-client";
 import { useAuth, type AuthUser } from "@/contexts/AuthContext";
 
 /* ────────────────────────────────────────────────────────────── */
@@ -37,6 +37,9 @@ export default function LoginForm() {
 
   const isEmail = identifier.includes("@");
   const contactField = isEmail ? "email" : "phone";
+
+  /* ── Wake server on mount ── */
+  useEffect(() => { wakeServer(); }, []);
 
   /* ── Timer Effect ── */
   useEffect(() => {

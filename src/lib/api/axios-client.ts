@@ -15,8 +15,18 @@ import axios from "axios";
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
   headers: { "Content-Type": "application/json" },
-  timeout: 60_000,
+  timeout: 90_000, // Extended for Render cold starts (~50s wake time)
 });
+
+// Wake up Render free-tier server if it's sleeping
+export async function wakeServer(): Promise<void> {
+  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  try {
+    await axios.get(`${base}/health`, { timeout: 90_000 });
+  } catch {
+    // Ignore — server may still be waking up, let the actual request handle it
+  }
+}
 
 /* ────────────────────────────────────────────────────────────── */
 /* ─── Request Interceptor                                   ─── */
