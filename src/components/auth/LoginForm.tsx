@@ -93,12 +93,15 @@ export default function LoginForm() {
   const handleForgotPassword = async () => {
     setIsLoading(true);
     setError("");
+    console.log("[ForgotPassword] identifier:", identifier, "contactField:", contactField);
     try {
-      await api.post("/auth/forgot-password", { [contactField]: identifier });
+      const res = await api.post("/auth/forgot-password", { [contactField]: identifier });
+      console.log("[ForgotPassword] success:", res.data);
       setFlow("reset");
       setStep(3);
       setTimer(60);
     } catch (err: any) {
+      console.error("[ForgotPassword] error:", err.response?.status, err.response?.data, err.message);
       setError(err.response?.data?.message || "Failed to initiate password reset.");
     } finally {
       setIsLoading(false);
