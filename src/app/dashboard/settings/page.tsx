@@ -3,29 +3,37 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  User, 
+  User as UserIcon, 
   Shield, 
   Car, 
   Settings, 
   Calendar,
   Camera,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import ProfileSection from "@/components/dashboard/settings/ProfileSection";
 import SecuritySection from "@/components/dashboard/settings/SecuritySection";
 import VehicleSection from "@/components/dashboard/settings/VehicleSection";
 import PreferencesSection from "@/components/dashboard/settings/PreferencesSection";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("profile");
 
   const sections = [
-    { id: "profile", label: "Profile", icon: User },
+    { id: "profile", label: "Profile", icon: UserIcon },
     { id: "security", label: "Security", icon: Shield },
     { id: "vehicle", label: "Vehicle", icon: Car },
     { id: "preferences", label: "Preferences", icon: Settings },
   ];
+
+  // Helper to format join date
+  const joinDate = user?.joinedDate 
+    ? new Date(user.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : "Joining...";
 
   return (
     <div className="h-full bg-[#f8fafc]/50 overflow-y-auto pb-20 md:pb-0">
@@ -35,8 +43,14 @@ export default function SettingsPage() {
         <div className="mb-10 md:mb-14 flex flex-col md:flex-row items-center gap-6 md:gap-10 bg-white p-6 md:p-10 rounded-2xl border border-primary/5 shadow-sm">
            <div className="relative">
               <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-primary/5 border-2 border-primary/10 flex items-center justify-center overflow-hidden group cursor-pointer shadow-inner">
-                 <User size={40} className="md:hidden text-primary/20 group-hover:scale-110 transition-transform duration-500" />
-                 <User size={48} className="hidden md:block text-primary/20 group-hover:scale-110 transition-transform duration-500" />
+                 {user?.profileImage ? (
+                    <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                 ) : (
+                    <>
+                       <UserIcon size={40} className="md:hidden text-primary/20 group-hover:scale-110 transition-transform duration-500" />
+                       <UserIcon size={48} className="hidden md:block text-primary/20 group-hover:scale-110 transition-transform duration-500" />
+                    </>
+                 )}
                  <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                     <Camera size={20} className="md:hidden text-white" />
                     <Camera size={24} className="hidden md:block text-white" />
@@ -45,13 +59,23 @@ export default function SettingsPage() {
            </div>
            <div className="text-center md:text-left">
               <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-4 mb-2">
-                 <h1 className="text-[28px] md:text-[32px] font-bold tracking-[-0.05em] text-primary">Frank Ride</h1>
-                 <span className="bg-primary/5 text-primary text-[9px] md:text-[10px] font-bold px-2.5 md:px-3 py-1 rounded-full uppercase tracking-widest border border-primary/5">Verified Member</span>
+                 <h1 className="text-[28px] md:text-[32px] font-bold tracking-[-0.05em] text-primary">
+                    {user?.name || "Authenticating..."}
+                 </h1>
+                 {user?.isVerified ? (
+                    <span className="bg-primary/5 text-primary text-[9px] md:text-[10px] font-bold px-2.5 md:px-3 py-1 rounded-full uppercase tracking-widest border border-primary/5">Verified Member</span>
+                 ) : (
+                    <span className="bg-amber-500/5 text-amber-600 text-[9px] md:text-[10px] font-bold px-2.5 md:px-3 py-1 rounded-full uppercase tracking-widest border border-amber-500/5">Sync Pending</span>
+                 )}
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-[12px] md:text-[13px] font-medium text-primary/30">
                  <span className="flex items-center gap-2 transition-colors hover:text-primary cursor-default"><MapPin size={13} className="md:hidden" /><MapPin size={14} className="hidden md:block" /> Global Hub</span>
-                 <span className="flex items-center gap-2 transition-colors hover:text-primary cursor-default"><Calendar size={13} className="md:hidden" /><Calendar size={14} className="hidden md:block" /> Joined April 2024</span>
-                 <span className="flex items-center gap-2 text-green-600"><CheckCircle2 size={13} className="md:hidden" /><CheckCircle2 size={14} className="hidden md:block" /> Identity Authorized</span>
+                 <span className="flex items-center gap-2 transition-colors hover:text-primary cursor-default"><Calendar size={13} className="md:hidden" /><Calendar size={14} className="hidden md:block" /> Joined {joinDate}</span>
+                 {user?.isVerified ? (
+                    <span className="flex items-center gap-2 text-green-600"><CheckCircle2 size={13} className="md:hidden" /><CheckCircle2 size={14} className="hidden md:block" /> Identity Authorized</span>
+                 ) : (
+                    <span className="flex items-center gap-2 text-amber-500"><AlertCircle size={13} className="md:hidden" /><AlertCircle size={14} className="hidden md:block" /> Authorization Required</span>
+                 )}
               </div>
            </div>
         </div>

@@ -5,12 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface SmartEarningsChartProps {
   mode: "weekly" | "daily";
+  data?: { day: string; amount: number }[];
 }
 
-const WEEKLY_DATA = [420, 380, 520, 480, 610, 590, 720, 842];
-const DAILY_DATA = [120, 145, 90, 180, 110, 210, 195, 230, 210, 240, 220, 260];
+const MOCK_WEEKLY = [420, 380, 520, 480, 610, 590, 720, 842];
+const MOCK_DAILY = [120, 145, 90, 180, 110, 210, 195, 230, 210, 240, 220, 260];
 
-export default function SmartEarningsChart({ mode }: SmartEarningsChartProps) {
+export default function SmartEarningsChart({ mode, data: liveData }: SmartEarningsChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoverData, setHoverData] = useState<{ x: number, y: number, value: number } | null>(null);
 
@@ -22,8 +23,10 @@ export default function SmartEarningsChart({ mode }: SmartEarningsChartProps) {
 
     let animationId: number;
     let progress = 0;
-    const data = mode === "weekly" ? WEEKLY_DATA : DAILY_DATA;
-    const prevData = mode === "weekly" ? DAILY_DATA : WEEKLY_DATA;
+    
+    // Use live data if provided, otherwise fallback to mock
+    const sourceData = liveData ? liveData.map(d => d.amount) : (mode === "weekly" ? MOCK_WEEKLY : MOCK_DAILY);
+    const data = sourceData.length > 0 ? sourceData : (mode === "weekly" ? MOCK_WEEKLY : MOCK_DAILY);
 
     const init = () => {
       canvas.width = canvas.parentElement?.clientWidth || 800;
@@ -32,15 +35,14 @@ export default function SmartEarningsChart({ mode }: SmartEarningsChartProps) {
 
     const getX = (i: number, total: number) => (i / (total - 1)) * (canvas.width - 160) + 80;
     const getY = (val: number) => {
-      const max = Math.max(...WEEKLY_DATA, ...DAILY_DATA) * 1.2;
+      const max = Math.max(...data, 100) * 1.2;
       return canvas.height - (val / max) * (canvas.height - 120) - 60;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-
+        
         // Find nearest point
         let nearestIdx = 0;
         let minDist = Infinity;
@@ -71,9 +73,6 @@ export default function SmartEarningsChart({ mode }: SmartEarningsChartProps) {
       ctx.lineWidth = 3;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-
-      // Linear Interpolation between modes logic simplified:
-      // In a real app we'd map data points. Here we just draw the current mode with a fade-in.
       
       data.forEach((val, i) => {
         const x = getX(i, data.length);
@@ -116,7 +115,7 @@ export default function SmartEarningsChart({ mode }: SmartEarningsChartProps) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationId);
     };
-  }, [mode]);
+  }, [mode, liveData]);
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">

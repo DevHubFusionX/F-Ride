@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   description: "Real-time, same-direction ride matching for sustainable communities.",
 };
 
+import QueryProvider from "@/components/providers/QueryProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,9 +31,13 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col bg-white text-deep-blue font-sans">
-        <SplashScreen />
-        <Navbar />
-        {children}
+        <QueryProvider>
+          <AuthProvider>
+            <SplashScreen />
+            <Navbar />
+            {children}
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

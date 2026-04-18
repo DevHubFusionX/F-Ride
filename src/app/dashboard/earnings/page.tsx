@@ -14,9 +14,14 @@ import {
 } from "lucide-react";
 import SmartEarningsChart from "@/components/dashboard/earnings/SmartEarningsChart";
 import FinancialLedger from "@/components/dashboard/earnings/FinancialLedger";
+import { useEarnings } from "@/hooks/useEarnings";
 
 export default function EarningsPage() {
+  const { data, isLoading } = useEarnings();
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
+
+  const earnings = data?.data;
+  const summary = earnings?.summary || { total: "₦0.00", avgDaily: "₦0.00", topZone: "...", carbonSaved: "0kg" };
 
   return (
     <div className="h-full bg-white overflow-y-auto pb-20 md:pb-0">
@@ -39,7 +44,11 @@ export default function EarningsPage() {
               </div>
               <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 block mb-4">Available Liquidity</span>
               <div className="flex items-baseline gap-2 mb-6 md:mb-8">
-                 <span className="text-[36px] md:text-[42px] font-black text-white tracking-tighter">₦1,242.00</span>
+                 {isLoading ? (
+                    <div className="h-12 w-48 bg-white/10 animate-pulse rounded" />
+                 ) : (
+                    <span className="text-[36px] md:text-[42px] font-black text-white tracking-tighter">{summary.total}</span>
+                 )}
               </div>
               <button className="w-full h-12 md:h-14 bg-white text-primary font-bold text-[12px] md:text-[13px] tracking-widest uppercase rounded-sm hover:bg-[#E76F32] hover:text-white transition-all duration-500">
                  Instant Withdrawal
@@ -52,20 +61,20 @@ export default function EarningsPage() {
            <div className="md:col-span-2 p-8 md:p-10 bg-primary/[0.02] border border-primary/5 rounded-sm flex flex-col justify-between">
               <div>
                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30 block mb-4">Network Velocity</span>
-                 <p className="text-[28px] md:text-[32px] font-black text-primary tracking-tighter mb-2">+₦842.10</p>
+                 <p className="text-[28px] md:text-[32px] font-black text-primary tracking-tighter mb-2">+{summary.avgDaily}</p>
                  <div className="flex items-center gap-2 text-green-600 text-[11px] md:text-[12px] font-bold">
                     <TrendingUp size={14} />
-                    <span>12% Increase from last period</span>
+                    <span>Average performance for current period</span>
                  </div>
               </div>
               <div className="mt-10 md:mt-12 pt-6 md:pt-8 border-t border-primary/5 flex gap-6 md:gap-8">
                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/20 block mb-1">Rider Revenue</span>
-                    <span className="text-[15px] md:text-[16px] font-bold text-primary font-mono">₦620.40</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/20 block mb-1">Top Zone</span>
+                    <span className="text-[13px] md:text-[14px] font-bold text-primary">{summary.topZone}</span>
                  </div>
                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/20 block mb-1">Courier Sync</span>
-                    <span className="text-[15px] md:text-[16px] font-bold text-primary font-mono">₦221.70</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/20 block mb-1">Impact Offset</span>
+                    <span className="text-[13px] md:text-[14px] font-bold text-primary">{summary.carbonSaved} CO2</span>
                  </div>
               </div>
            </div>
@@ -109,7 +118,7 @@ export default function EarningsPage() {
            </div>
 
            <div className="h-[300px] md:h-[400px] w-full bg-primary/[0.01] border border-primary/5 rounded-sm relative overflow-hidden group cursor-crosshair">
-              <SmartEarningsChart mode={viewMode} />
+              <SmartEarningsChart mode={viewMode} data={earnings?.daily} />
            </div>
         </section>
 

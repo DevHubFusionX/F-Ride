@@ -2,58 +2,35 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { 
-  ArrowUpRight, 
-  Car, 
-  Package, 
-  Zap, 
-  CheckCircle2,
-  ExternalLink
-} from "lucide-react";
-
-const LEDGER_DATA = [
-  {
-    id: "TX-9042",
-    title: "City Grid Sync #29042",
-    type: "rider",
-    date: "Modernized: 2 mins ago",
-    amount: "+₦24.50",
-    status: "Verified",
-    method: "Digital Wallet"
-  },
-  {
-    id: "TX-8910",
-    title: "Document Parcel Batch",
-    type: "courier",
-    date: "Yesterday",
-    amount: "+₦12.10",
-    status: "Verified",
-    method: "Digital Wallet"
-  },
-  {
-    id: "TX-8842",
-    title: "Sustainability Bonus",
-    type: "bonus",
-    date: "Yesterday",
-    amount: "+₦15.00",
-    status: "Verified",
-    method: "Frank Credits"
-  },
-  {
-    id: "TX-7742",
-    title: "High-Capacity Sync #27742",
-    type: "rider",
-    date: "Apr 10, 2024",
-    amount: "+₦42.80",
-    status: "Verified",
-    method: "Digital Wallet"
-  }
-];
+import { Car, Package, Zap, CheckCircle2, ExternalLink } from "lucide-react";
+import { useActivity } from "@/hooks/useActivity";
 
 export default function FinancialLedger() {
+  const { data, isLoading } = useActivity();
+
+  const earningsItems = (data?.data ?? []).filter((item) => item.type === "earnings").slice(0, 5);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 w-full bg-primary/[0.02] border border-primary/5 rounded-sm animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (earningsItems.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-[13px] font-medium text-primary/20">No payout records yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {LEDGER_DATA.map((item, idx) => (
+      {earningsItems.map((item, idx) => (
         <motion.div
            key={item.id}
            initial={{ opacity: 0, y: 10 }}
@@ -63,16 +40,16 @@ export default function FinancialLedger() {
         >
            <div className="flex items-center gap-6 mb-4 md:mb-0">
               <div className="w-12 h-12 rounded-sm bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                 {item.type === "rider" && <Car size={20} strokeWidth={1.5} />}
+                 {item.type === "trip" && <Car size={20} strokeWidth={1.5} />}
                  {item.type === "courier" && <Package size={20} strokeWidth={1.5} />}
-                 {item.type === "bonus" && <Zap size={20} strokeWidth={1.5} />}
+                 {item.type === "earnings" && <Zap size={20} strokeWidth={1.5} />}
               </div>
               <div>
                  <div className="flex items-center gap-3 mb-1">
                     <p className="text-[15px] font-bold text-primary tracking-tight">{item.title}</p>
                     <span className="text-[9px] font-black uppercase tracking-widest text-primary/15">{item.id}</span>
                  </div>
-                 <p className="text-[12px] font-medium text-primary/30 tracking-tight">{item.date} • {item.method}</p>
+                 <p className="text-[12px] font-medium text-primary/30 tracking-tight">{item.date} • {item.details}</p>
               </div>
            </div>
 
@@ -81,7 +58,7 @@ export default function FinancialLedger() {
                  <span className="text-[18px] font-black text-primary tracking-tighter mb-1">{item.amount}</span>
                  <div className="flex items-center gap-1.5 text-green-600 text-[10px] font-bold uppercase tracking-widest">
                     <CheckCircle2 size={12} />
-                    {item.status}
+                    Verified
                  </div>
               </div>
               <button className="text-primary/10 hover:text-primary transition-colors">

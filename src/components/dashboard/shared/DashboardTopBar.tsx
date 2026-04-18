@@ -4,19 +4,44 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navigation, Car, Package, Bell, User, Clock, Wallet } from "lucide-react";
+import { Navigation, Car, Package, Bell, User, Clock, Wallet, LogOut } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardTopBar() {
+  const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const { user, logout } = useAuth();
 
-  const tabs = [
-    { label: "Trip", href: "/dashboard/rider", icon: Navigation },
-    { label: "Drive", href: "/dashboard/driver", icon: Car },
-    { label: "Courier", href: "/dashboard/courier", icon: Package },
+  // Derive display values from auth state
+  const displayName = user?.name || "User";
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+  const roleBadge = user?.role
+    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+    : "Member";
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <header className="h-16 md:h-20 w-full bg-white border-b border-primary/5" />;
+
+  const allTabs = [
+    { label: "Trip", href: "/dashboard/rider", icon: Navigation, roles: ["rider", "driver", "courier"] },
+    { label: "Drive", href: "/dashboard/driver", icon: Car, roles: ["driver"] },
+    { label: "Courier", href: "/dashboard/courier", icon: Package, roles: ["courier"] },
   ];
+
+  const filteredTabs = allTabs.filter(tab => 
+    !tab.roles || tab.roles.includes(user?.role || "rider")
+  );
 
   return (
     <header className="h-16 md:h-20 w-full bg-white border-b border-primary/5 px-4 md:px-6 lg:px-12 flex items-center justify-between z-[60] relative">
@@ -26,7 +51,7 @@ export default function DashboardTopBar() {
         </Link>
 
         <nav className="hidden md:flex items-center h-16 md:h-20">
-          {tabs.map((tab) => {
+          {filteredTabs.map((tab) => {
             const isActive = pathname === tab.href;
             const Icon = tab.icon;
             return (
@@ -76,9 +101,8 @@ export default function DashboardTopBar() {
           onMouseEnter={() => setIsProfileOpen(true)}
           onMouseLeave={() => setIsProfileOpen(false)}
         >
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/95 transition-all shadow-lg shadow-primary/10 ml-1 md:ml-2">
-            <User size={16} className="md:hidden" />
-            <User size={18} className="hidden md:block" />
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/95 transition-all shadow-lg shadow-primary/10 ml-1 md:ml-2 text-[11px] md:text-[12px] font-bold tracking-tight">
+            {initials}
           </div>
 
           <AnimatePresence>
@@ -91,13 +115,15 @@ export default function DashboardTopBar() {
                 className="absolute right-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-sm p-2 z-[70] origin-top-right"
               >
                 <div className="px-4 py-3 border-b border-primary/5 mb-2">
-                  <p className="text-[13px] font-bold text-primary leading-none">Frank Ride</p>
-                  <p className="text-[11px] font-medium text-primary/30 mt-1">Global Member</p>
+                  <p className="text-[13px] font-bold text-primary leading-none">{displayName}</p>
+                  <p className="text-[11px] font-medium text-primary/30 mt-1">{roleBadge}</p>
                 </div>
                 
                 {[
                   { label: "Settings", icon: User, href: "/dashboard/settings" },
-                  { label: "Earnings Overview", icon: Clock, href: "/dashboard/earnings" },
+                  ...(user?.role !== "rider" 
+                    ? [{ label: "Earnings Overview", icon: Clock, href: "/dashboard/earnings" }] 
+                    : []),
                 ].map((item) => (
                   <Link
                     key={item.label}
@@ -109,13 +135,13 @@ export default function DashboardTopBar() {
                   </Link>
                 ))}
                 
-                <Link
-                  href="/login"
-                  className="flex items-center gap-3 px-4 py-2.5 text-[12px] font-bold text-[#E76F32] hover:bg-red-50 transition-colors rounded-sm mt-2 border-t border-primary/5 pt-4"
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-3 px-4 py-2.5 text-[12px] font-bold text-[#E76F32] hover:bg-red-50 transition-colors rounded-sm mt-2 border-t border-primary/5 pt-4 w-full text-left"
                 >
-                  <Navigation size={14} className="rotate-90" />
-                  Logout / Exit
-                </Link>
+                  <LogOut size={14} />
+                  Logout
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -126,9 +152,11 @@ export default function DashboardTopBar() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-primary/5 z-[60] pb-[env(safe-area-inset-bottom)]">
         <nav className="flex items-center justify-around h-14">
           {[
-            ...tabs,
+            ...filteredTabs,
             { label: "Activity", href: "/dashboard/activity", icon: Clock },
-            { label: "Earnings", href: "/dashboard/earnings", icon: Wallet },
+            ...(user?.role !== "rider" 
+              ? [{ label: "Earnings", href: "/dashboard/earnings", icon: Wallet }] 
+              : []),
           ].map((tab) => {
             const isActive = pathname === tab.href;
             const Icon = tab.icon;

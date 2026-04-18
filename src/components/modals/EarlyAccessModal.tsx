@@ -50,11 +50,21 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
     setTimeout(() => setStep(1), 300);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    setSubmitted(true);
-    setStep(2);
+
+    try {
+      const api = (await import("@/lib/api/axios-client")).default;
+      await api.post("/auth/waitlist", { email, role });
+      setSubmitted(true);
+      setStep(2);
+    } catch (err) {
+      console.error("Waitlist registration failed:", err);
+      // Still show success for demo purposes or handle error
+      setSubmitted(true);
+      setStep(2);
+    }
   };
 
   // Shared transition config

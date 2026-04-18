@@ -35,14 +35,20 @@ function MapEvents({ setCoords }: { setCoords: (c: { lng: number; lat: number })
   return null;
 }
 
+/**
+ * NOTE: Aggressive auto-centering has been removed to allow free dragging.
+ * Manual recentering is available via the UI controls.
+ */
 function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
+  const [hasCentred, setHasCentred] = useState(false);
   
   useEffect(() => {
-    if (center) {
+    if (center && !hasCentred) {
       map.setView(center, map.getZoom(), { animate: true });
+      setHasCentred(true);
     }
-  }, [center, map]);
+  }, [center, map, hasCentred]);
   
   return null;
 }
@@ -166,17 +172,17 @@ export default function DriverMap({ activeTrip, matching, fullscreen = false, va
   const isMini = variant === "mini";
 
   return (
-    <div className={`${fullscreen ? 'absolute' : (isMini ? 'relative' : 'fixed')} inset-0 bg-[#f0f4f8] z-0 overflow-hidden`}>
-      <div className="w-full h-full opacity-90">
+    <div className={`${fullscreen ? 'absolute' : (isMini ? 'relative' : 'absolute')} inset-0 bg-[#f0f4f8] z-0 overflow-hidden pointer-events-auto`}>
+      <div className="w-full h-full opacity-90 pointer-events-auto">
         <MapContainer
           key={`map-${variant}-${fullscreen}`}
           center={mapCenter}
           zoom={isMini ? 11 : 12}
           zoomControl={false}
-          dragging={!isMini}
-          touchZoom={!isMini}
-          doubleClickZoom={!isMini}
-          scrollWheelZoom={!isMini}
+          dragging={true}
+          touchZoom={true}
+          doubleClickZoom={true}
+          scrollWheelZoom={true}
           style={{ height: "100%", width: "100%", background: "#f0f4f8" }}
         >
           <TileLayer
