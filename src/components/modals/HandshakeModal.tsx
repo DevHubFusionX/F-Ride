@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Scan, X, Key, Info, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Scan, X, Key, Info, CheckCircle2, AlertCircle } from "lucide-react";
+import api from "@/lib/api/axios-client";
 
 interface HandshakeModalProps {
   isOpen: boolean;
@@ -10,22 +11,35 @@ interface HandshakeModalProps {
   onVerify: () => void;
   role: "rider" | "driver" | "courier";
   partnerName: string;
+  tripId?: string;
 }
 
-export default function HandshakeModal({ isOpen, onClose, onVerify, role, partnerName }: HandshakeModalProps) {
+export default function HandshakeModal({ isOpen, onClose, onVerify, role, partnerName, tripId }: HandshakeModalProps) {
   const [pin, setPin] = useState(["", "", "", ""]);
+  const [riderPin, setRiderPin] = useState<string[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [timer, setTimer] = useState(180); // 3 minutes waiting
+  const [error, setError] = useState("");
+  const [timer, setTimer] = useState(180);
 
   useEffect(() => {
     if (isOpen) {
       setPin(["", "", "", ""]);
       setIsVerifying(false);
       setIsSuccess(false);
+      setError("");
       setTimer(180);
+
+      // Fetch real PIN for rider from the active trip
+      if (role === "rider" && tripId) {
+        api.get(`/trips/${tripId}`)
+          .then(({ data }) => {
+            if (data?.pin) setRiderPin(data.pin.split(""));
+          })
+          .catch(() => setRiderPin(["?", "?", "?", "?"]));
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, role, tripId]);
 
   useEffect(() => {
     if (!isOpen || role === "rider" || timer <= 0 || isSuccess) return;
@@ -35,38 +49,46 @@ export default function HandshakeModal({ isOpen, onClose, onVerify, role, partne
 
   const handlePinChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value) || isSuccess) return;
-    
     const newPin = [...pin];
     newPin[index] = value.slice(-1);
     setPin(newPin);
-
-    // Auto-focus next input
     if (value && index < 3) {
-      const nextInput = document.getElementById(`pin-${index + 1}`);
-      nextInput?.focus();
+      document.getElementById(`pin-${index + 1}`)?.focus();
     }
-    
     if (newPin.every((p) => p !== "")) {
-      handleVerification();
+      handleVerification(newPin.join(""));
     }
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !pin[index] && index > 0) {
-      const prevInput = document.getElementById(`pin-${index - 1}`);
-      prevInput?.focus();
+      document.getElementById(`pin-${index - 1}`)?.focus();
     }
   };
 
-  const handleVerification = () => {
+  const handleVerification = async (enteredPin?: string) => {
+    const pinToVerify = enteredPin || pin.join("");
+    if (pinToVerify.length < 4) return;
+
     setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
+    setError("");
+
+    try {
+      await api.post("/trips", {
+        action: "verify_pin",
+        role,
+        pin: pinToVerify,
+        ...(tripId ? { id: tripId } : {}),
+      });
       setIsSuccess(true);
-      setTimeout(() => {
-        onVerify();
-      }, 1500); // 1.5s for the success animation to play
-    }, 1000); // simulate network validation
+      setTimeout(() => onVerify(), 1500);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Invalid PIN. Ask the rider to check their code.");
+      setPin(["", "", "", ""]);
+      document.getElementById("pin-0")?.focus();
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -74,6 +96,8 @@ export default function HandshakeModal({ isOpen, onClose, onVerify, role, partne
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
+
+  const displayPin = riderPin.length === 4 ? riderPin : ["?", "?", "?", "?"];
 
   return (
     <AnimatePresence>
@@ -157,9 +181,9 @@ export default function HandshakeModal({ isOpen, onClose, onVerify, role, partne
                       </div>
 
                       {role === "rider" ? (
-                         // Rider gets a PIN to show
+                         // Rider sees their real PIN from the trip
                          <div className="flex justify-center gap-2 md:gap-3 mb-6 md:mb-8">
-                           {["4", "8", "1", "5"].map((digit, i) => (
+                           {displayPin.map((digit, i) => (
                              <div key={i} className="w-12 h-14 md:w-14 md:h-16 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[24px] md:text-[28px] font-bold text-slate-900 shadow-sm">
                                {digit}
                              </div>
@@ -209,10 +233,17 @@ export default function HandshakeModal({ isOpen, onClose, onVerify, role, partne
                          )}
                       </div>
 
+                      {error && (
+                        <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-xl p-3 mb-4">
+                          <AlertCircle size={15} className="text-red-500 flex-shrink-0" />
+                          <p className="text-[12px] font-semibold text-red-600">{error}</p>
+                        </div>
+                      )}
+
                       <div className="flex gap-3">
                          {role !== "rider" && (
                             <button
-                               onClick={handleVerification}
+                               onClick={() => handleVerification()}
                                disabled={isVerifying}
                                className="flex-1 h-12 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 group"
                             >

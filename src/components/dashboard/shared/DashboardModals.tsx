@@ -24,6 +24,7 @@ export default function DashboardModals() {
     isMapFullscreen, mapMatching, closeMapFullscreen,
     isPersonModalOpen, personModalData, closePersonModal,
     selectedPartner, setSelectedPartner,
+    activeTripId,
     riderState, setRiderState,
     driverState, setDriverState,
   } = useTripContext();
@@ -45,6 +46,7 @@ export default function DashboardModals() {
         onVerify={() => completeHandshake(handshakeRole)}
         role={handshakeRole}
         partnerName={handshakePartnerName}
+        tripId={activeTripId || undefined}
       />
 
       <TripCheckoutModal

@@ -65,6 +65,7 @@ interface TripContextType {
   /* ── Shared Trip Data ── */
   selectedPartner: PartnerInfo | null;
   setSelectedPartner: (p: PartnerInfo | null) => void;
+  activeTripId: string | null;
   activePackage: PackageInfo | null;
   setActivePackage: (p: PackageInfo | null) => void;
 
@@ -140,6 +141,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   /* ── Shared Data ── */
   const [selectedPartner, setSelectedPartner] = useState<PartnerInfo | null>(null);
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
   const [activePackage, setActivePackage] = useState<PackageInfo | null>(null);
 
   /* ── Modal State ── */
@@ -213,6 +215,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         dropoff: { address: dropoff, coordinates: coords },
         fare: 2500,
       });
+      setActiveTripId(riderApi.executeAction.data?.trip?._id || null);
       setRiderState("searching");
       setRiderShowDrivers(true);
     } catch (error) {
@@ -388,6 +391,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         driverState, setDriverState, driverShowMatches, setDriverShowMatches,
         courierState, setCourierState, courierTrackingActive, setCourierTrackingActive,
         selectedPartner, setSelectedPartner,
+        activeTripId,
         activePackage, setActivePackage,
         isHandshakeOpen, handshakeRole, handshakePartnerName, openHandshake, closeHandshake,
         isCheckoutOpen, checkoutRole, checkoutPartnerName, checkoutFare, openCheckout, closeCheckout,
