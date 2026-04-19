@@ -34,7 +34,7 @@ export default function DashboardTopBar() {
   if (!mounted) return <header className="h-16 md:h-20 w-full bg-white border-b border-primary/5" />;
 
   const allTabs = [
-    { label: "Trip", href: "/dashboard/rider", icon: Navigation, roles: ["rider", "driver", "courier"] },
+    { label: "Trip", href: "/dashboard/rider", icon: Navigation, roles: ["rider"] },
     { label: "Drive", href: "/dashboard/driver", icon: Car, roles: ["driver"] },
     { label: "Courier", href: "/dashboard/courier", icon: Package, roles: ["courier"] },
   ];
