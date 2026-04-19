@@ -1,6 +1,14 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// In production on Vercel, requests go through the Next.js proxy at /api
+// which forwards server-side to Render — no CORS, no missing env vars.
+// In local dev, hit the backend directly.
+const IS_BROWSER = typeof window !== "undefined";
+const BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api")
+    : "/api";
+
 const COLD_START_TIMEOUT = 90_000;
 
 const api = axios.create({
@@ -11,8 +19,13 @@ const api = axios.create({
 
 // Ping health endpoint to wake a sleeping Render free-tier instance
 export async function wakeServer(): Promise<void> {
+  if (!IS_BROWSER) return;
+  const healthUrl =
+    process.env.NODE_ENV === "development"
+      ? `${BASE_URL}/health`
+      : "/api/health";
   try {
-    await axios.get(`${BASE_URL}/health`, { timeout: COLD_START_TIMEOUT });
+    await axios.get(healthUrl, { timeout: COLD_START_TIMEOUT });
   } catch {
     // Ignore — the actual request will handle any remaining failure
   }
