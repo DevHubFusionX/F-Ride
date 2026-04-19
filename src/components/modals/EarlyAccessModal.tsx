@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { wakeServer } from "@/lib/api/axios-client";
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
 
@@ -17,6 +18,11 @@ export default function EarlyAccessModal({ isOpen, onClose }: EarlyAccessModalPr
   const [role, setRole] = useState<UserRole>(null);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  // Wake server when modal opens
+  useEffect(() => {
+    if (isOpen) wakeServer();
+  }, [isOpen]);
 
   // Reset state when modal closes
   useEffect(() => {

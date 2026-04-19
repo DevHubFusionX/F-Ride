@@ -1,31 +1,27 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 
-/* ────────────────────────────────────────────────────────────── */
-/* ─── Global Axios Instance                                 ─── */
-/* ────────────────────────────────────────────────────────────── */
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const COLD_START_TIMEOUT = 90_000;
 
-/**
- * Pre-configured Axios instance for all FrankRide API calls.
- *
- * - Base URL sourced from `NEXT_PUBLIC_API_URL` (defaults to local dev server).
- * - Automatically attaches the JWT token from localStorage on every request.
- * - Dispatches a custom `auth:logout` event on any 401 response so the
- *   AuthContext can clear the session reactively.
- */
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 90_000, // Extended for Render cold starts (~50s wake time)
+  timeout: COLD_START_TIMEOUT,
 });
 
-// Wake up Render free-tier server if it's sleeping
+// Ping health endpoint to wake a sleeping Render free-tier instance
 export async function wakeServer(): Promise<void> {
-  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
   try {
-    await axios.get(`${base}/health`, { timeout: 90_000 });
+    await axios.get(`${BASE_URL}/health`, { timeout: COLD_START_TIMEOUT });
   } catch {
-    // Ignore — server may still be waking up, let the actual request handle it
+    // Ignore — the actual request will handle any remaining failure
   }
+}
+
+// Retry a request once after waking the server on network timeout
+async function retryAfterWake(config: AxiosRequestConfig) {
+  await wakeServer();
+  return axios({ ...config, baseURL: BASE_URL, timeout: COLD_START_TIMEOUT });
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -63,16 +59,27 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     const status = error.response?.status;
-    const url = error.config?.url ?? "unknown";
+    const config = error.config;
 
-    if (process.env.NODE_ENV === "development") {
-      console.error(`[API ✕] ${status ?? "NETWORK"} ${url} — ${error.message}`);
+    // On network timeout/error with no response, wake the server and retry once
+    if (!error.response && !config?._retried) {
+      config._retried = true;
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`[API] Network error on ${config?.url} — waking server and retrying...`);
+      }
+      try {
+        return await retryAfterWake(config);
+      } catch (retryError) {
+        return Promise.reject(retryError);
+      }
     }
 
-    // Global 401 handler: fire a custom event so AuthContext can react
-    // without creating a circular import dependency.
+    if (process.env.NODE_ENV === "development") {
+      console.error(`[API ✕] ${status ?? "NETWORK"} ${config?.url ?? "unknown"} — ${error.message}`);
+    }
+
     if (status === 401 && typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("auth:logout"));
     }
