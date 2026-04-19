@@ -21,7 +21,7 @@ export default function DriverDashboard() {
     driverShowMatches, setDriverShowMatches,
     selectedPartner, setSelectedPartner,
     openHandshake, openCheckout, openCancel, openPersonModal,
-    acceptRider,
+    acceptRider, goOnline, goOffline,
   } = useTripContext();
 
   const { matches } = useTrips("driver");
@@ -48,7 +48,11 @@ export default function DriverDashboard() {
       {/* ── Left Side: Interaction Panel ── */}
       <aside className="w-full lg:w-[420px] flex-shrink-0 h-auto lg:h-full border-b lg:border-b-0 lg:border-r border-primary/5 bg-white relative z-20 max-h-[50vh] lg:max-h-none overflow-y-auto">
         <RideOfferPanel
-          onStateChange={setDriverState}
+          onStateChange={(state, destination) => {
+            if (state === "matching" && destination) goOnline(destination);
+            else if (state === "idle") goOffline();
+            else setDriverState(state);
+          }}
           dashboardState={driverState}
           activeTrip={selectedPartner}
           matches={driverState === "matching" ? currentMatches : []}

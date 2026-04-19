@@ -11,7 +11,7 @@ import WaitingForMatches from "./WaitingForMatches";
 import ActiveOrderOverview from "./ActiveOrderOverview";
 
 interface RideOfferPanelProps {
-  onStateChange: (state: string) => void;
+  onStateChange: (state: string, destination?: string) => void;
   dashboardState?: string;
   activeTrip?: any;
   matches?: any[];
@@ -51,7 +51,7 @@ export default function RideOfferPanel({
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
     setInternalState("matching");
-    onStateChange("matching");
+    onStateChange("matching", destination);
   };
 
   const handleCancel = () => {

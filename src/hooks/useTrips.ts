@@ -29,14 +29,15 @@ const TripActionResponseSchema = z.object({
  *
  * Uses TanStack Query for caching, deduplication, and background refetching.
  */
-export function useTrips(role: "rider" | "driver" | "courier") {
+export function useTrips(role: "rider" | "driver" | "courier", destination?: string) {
   const queryClient = useQueryClient();
   const { userLocation } = useLocation();
 
   const matches = useQuery({
-    queryKey: ["matches", role],
+    queryKey: ["matches", role, destination],
     queryFn: async () => {
       const params = new URLSearchParams({ role });
+      if (destination) params.set("destination", destination);
       if (userLocation) {
         params.set("lat", userLocation.lat.toString());
         params.set("lng", userLocation.lng.toString());

@@ -101,6 +101,8 @@ interface TripContextType {
   createTrip: (pickup: string, dropoff: string) => Promise<void>;
   bookPartner: (partner: PartnerInfo) => Promise<void>;
   acceptRider: (rider: PartnerInfo) => Promise<void>;
+  goOnline: (destination: string) => Promise<void>;
+  goOffline: () => Promise<void>;
   dispatchCourier: () => Promise<void>;
   completeHandshake: (role: TripRole) => void;
   completeTrip: (role: TripRole) => void;
@@ -118,18 +120,20 @@ import { useTrips } from "@/hooks/useTrips";
 import { useLocation } from "@/contexts/LocationContext";
 
 export function TripProvider({ children }: { children: ReactNode }) {
-  /* ── API Hooks ── */
-  const riderApi = useTrips("rider");
-  const driverApi = useTrips("driver");
-  const courierApi = useTrips("courier");
-  const { userLocation } = useLocation();
-
   /* ── Per-Role State ── */
   const [riderState, setRiderState] = useState("idle");
   const [riderShowDrivers, setRiderShowDrivers] = useState(false);
+  const [riderDestination, setRiderDestination] = useState("");
 
   const [driverState, setDriverState] = useState("idle");
   const [driverShowMatches, setDriverShowMatches] = useState(false);
+  const [driverDestination, setDriverDestination] = useState("");
+
+  /* ── API Hooks ── */
+  const riderApi = useTrips("rider", riderDestination);
+  const driverApi = useTrips("driver", driverDestination);
+  const courierApi = useTrips("courier");
+  const { userLocation } = useLocation();
 
   const [courierState, setCourierState] = useState("idle");
   const [courierTrackingActive, setCourierTrackingActive] = useState(false);
@@ -199,13 +203,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
   /* ── Lifecycle Actions ── */
   const createTrip = useCallback(async (pickup: string, dropoff: string) => {
     try {
+      setRiderDestination(dropoff);
       const coords: [number, number] = userLocation
         ? [userLocation.lng, userLocation.lat]
         : [7.49508, 9.05785];
       await riderApi.executeAction.mutateAsync({
         action: "create",
         pickup: { address: pickup || "Current Location", coordinates: coords },
-        dropoff: { address: dropoff, coordinates: coords }, // dropoff coords resolved server-side / geocoding
+        dropoff: { address: dropoff, coordinates: coords },
         fare: 2500,
       });
       setRiderState("searching");
@@ -225,6 +230,29 @@ export function TripProvider({ children }: { children: ReactNode }) {
       console.error("Failed to book driver:", error);
     }
   }, [riderApi]);
+
+  const goOnline = useCallback(async (destination: string) => {
+    try {
+      setDriverDestination(destination);
+      await driverApi.executeAction.mutateAsync({ action: "go_online", destination } as any);
+      setDriverState("matching");
+      setDriverShowMatches(true);
+      driverApi.matches.refetch();
+    } catch (error) {
+      console.error("Failed to go online:", error);
+    }
+  }, [driverApi]);
+
+  const goOffline = useCallback(async () => {
+    try {
+      await driverApi.executeAction.mutateAsync({ action: "go_offline" } as any);
+      setDriverDestination("");
+      setDriverState("idle");
+      setDriverShowMatches(false);
+    } catch (error) {
+      console.error("Failed to go offline:", error);
+    }
+  }, [driverApi]);
 
   const acceptRider = useCallback(async (rider: PartnerInfo) => {
     try {
@@ -366,7 +394,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         isCancelOpen, cancelRole, openCancel, closeCancel,
         isMapFullscreen, mapMatching, openMapFullscreen, closeMapFullscreen,
         isPersonModalOpen, personModalData, openPersonModal, closePersonModal,
-        createTrip, bookPartner, acceptRider, dispatchCourier,
+        createTrip, bookPartner, acceptRider, goOnline, goOffline, dispatchCourier,
         completeHandshake, completeTrip, cancelTrip, resetRole,
       }}
     >
