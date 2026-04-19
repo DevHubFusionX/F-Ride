@@ -14,6 +14,7 @@ const DriverMap = dynamic(() => import("@/components/dashboard/driver/DriverMap"
 });
 
 import { useTrips } from "@/hooks/useTrips";
+import api from "@/lib/api/axios-client";
 
 export default function DriverDashboard() {
   const {
@@ -25,6 +26,39 @@ export default function DriverDashboard() {
   } = useTripContext();
 
   const { matches } = useTrips("driver");
+
+  // Poll for booking when driver is in matching state — detects when a rider books them
+  useEffect(() => {
+    if (driverState !== "matching") return;
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.get("/trips/active");
+        if (data?.trip?.status === "accepted") {
+          clearInterval(interval);
+          // Populate selectedPartner from the trip's rider info
+          if (data.trip.rider) {
+            const r = data.trip.rider;
+            setSelectedPartner({
+              _id: r._id || r,
+              name: r.name || "Rider",
+              initials: (r.name || "R").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2),
+              distance: "En route",
+              overlap: "",
+              pickup: data.trip.pickupLocation?.address || "",
+              dropoff: data.trip.dropoffLocation?.address || "",
+              color: "#2D9CDB",
+              role: "rider",
+            });
+          }
+          setDriverState("enroute");
+          setDriverShowMatches(false);
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [driverState, setDriverState, setDriverShowMatches, setSelectedPartner]);
 
   // Trigger match search when state changes to matching
   useEffect(() => {
